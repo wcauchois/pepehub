@@ -8,4 +8,5 @@
                  [compojure "1.4.0"]]
   :uberjar-name "pepehub-standalone.jar"
   :plugins [[lein-environ "1.0.1"]]
+  :main pepehub.core
   :profiles {:production {:env {:production true}}})
