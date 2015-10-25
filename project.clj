@@ -6,6 +6,7 @@
                  [environ "1.0.1"]
                  [ring/ring-jetty-adapter "1.4.0"]
                  [ring/ring-core "1.4.0"]
+                 [stencil "0.5.0"]
                  [compojure "1.4.0"]]
   :uberjar-name "pepehub-standalone.jar"
   :plugins [[lein-environ "1.0.1"]]

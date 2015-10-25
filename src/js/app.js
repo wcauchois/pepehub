@@ -2,7 +2,8 @@ var _ = require('lodash'),
     Promise = require('bluebird'),
     Dispatcher = require('flux').Dispatcher,
     classNames = require('classnames'),
-    React = require('react/addons');
+    React = require('react'),
+    ReactDOM = require('react-dom');
 
 var HomePage = React.createClass({
   render: function() {
@@ -14,8 +15,8 @@ var HomePage = React.createClass({
   }
 });
 
-global.renderPage = function(el, params) {
-  React.render(
+global.renderPage = function(el) {
+  ReactDOM.render(
     <HomePage />,
     el
   );
