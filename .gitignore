@@ -1,5 +1,6 @@
 /target
 /classes
+CreateThumbnail.zip
 /checkouts
 pom.xml
 pom.xml.asc
@@ -11,5 +12,5 @@ pom.xml.asc
 .hg/
 /profiles.clj
 *.swp
-node_modules
+/node_modules
 /resources/public/build
