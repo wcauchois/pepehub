@@ -27,3 +27,6 @@ gulp.task('watch', ['scripts', 'styles'], function() {
   gulp.watch('src/js/**', ['scripts']);
   gulp.watch('src/less/**', ['styles']);
 });
+
+gulp.task('heroku:production', ['default']);
+
