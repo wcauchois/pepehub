@@ -11,3 +11,5 @@ pom.xml.asc
 .hg/
 /profiles.clj
 *.swp
+node_modules
+/resources/public/build
