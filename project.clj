@@ -8,7 +8,6 @@
                  [compojure "1.4.0"]]
   :uberjar-name "pepehub-standalone.jar"
   :plugins [[lein-environ "1.0.1"]]
-  :hooks [environ.leiningen.hooks]
   :min-lein-version "2.0.0"
   :main pepehub.core
   :profiles {:production {:env {:production true}}
