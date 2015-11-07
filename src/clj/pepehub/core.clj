@@ -1,9 +1,13 @@
 (ns pepehub.core
   (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
-            [compojure.handler :refer [site]]
             [compojure.route :as route]
             [stencil.core :refer [render-file]]
             [clojure.data.json :as json]
+            [ring.middleware.params :refer [wrap-params]]
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+            [ring.middleware.session :refer [wrap-session]]
+            [ring.middleware.session.store :refer [SessionStore]]
+            [ring.util.response :refer :all]
             [monger.core :as mg]
             [monger.query :as q]
             [monger.operators :refer :all]
@@ -38,8 +42,8 @@
    (let [value (get-in req [:params name])]
      (if value (Integer/parseInt value) default-value))))
 
-(defn json-response [data]
-  {:status 200
+(defn json-response [data & [status]]
+  {:status (or status 200)
    :headers {"Content-Type" "application/json"}
    :body (json/write-str data)})
 
@@ -86,23 +90,69 @@
 (def add-tag (tag-modifier $addToSet))
 (def remove-tag (tag-modifier $pull))
 
+(defn generate-new-random-key []
+  (str (java.util.UUID/randomUUID)))
+
+(deftype MongoSessionStore [db]
+  SessionStore
+  (read-session [store key]
+    (mc/find-one-as-map (.db store) "sessions" {:_id key}))
+  (write-session [store key data]
+    (let [key (or key (generate-new-random-key))]
+      (mc/insert (.db store) "sessions" (assoc data :_id key))
+      key))
+  (delete-session [store key]
+    (mc/remove (.db store) "sessions" {:_id key})
+    nil))
+
+(defn admin-login [req]
+  (let [login-successful
+        (= (get-in req [:params :pw]) (env :admin-password))]
+    {:status (if login-successful 200 400)
+     :headers {"Content-Type" "text/plain"}
+     :session (if login-successful {:admin true} nil)
+     :body (if login-successful
+             "logged in as admin"
+             "wrong password")}))
+
+(defn require-admin [handler]
+  (fn [req]
+    (if (get-in req [:session :admin])
+      (handler req)
+      (json-response {"message" "access denied"} 403))))
+
+(defn delete-image [req]
+  (let [id (ObjectId. (get-in req [:params :id]))]
+    (mc/remove @mongo-db "images" {:_id id})
+    (json-response {"result" "OK"})))
+
 (defroutes app
   (GET "/" [] (home))
   (GET "/get_images.json" req (get-images req))
   (GET "/get_image.json" req (get-image req))
   (GET "/add_tag.json" req (add-tag req))
   (GET "/remove_tag.json" req (remove-tag req))
+  (POST "/delete_image.json" req ((require-admin delete-image) req))
+  (GET "/admin_login" req (admin-login req))
   (route/resources "/")
   (ANY "*" []
     (route/not-found (slurp (io/resource "404.html")))))
+
+(defn site [routes session-store]
+  (let [with-opts (fn [routes middleware opts] (middleware routes opts))]
+    (-> routes
+        wrap-keyword-params
+        wrap-params
+        (with-opts wrap-session {:store session-store}))))
 
 (defn -main [& [port]]
   (stencil.loader/set-cache (clojure.core.cache/ttl-cache-factory {} :ttl 0))
   (let [{:keys [conn db]} (mg/connect-via-uri (env :mongolab-uri))]
     (reset! mongo-conn conn)
     (reset! mongo-db db))
-  (let [port (Integer. (or port (env :port) 5000))]
-    (jetty/run-jetty (site #'app) {:port port :join? false})))
+  (let [port (Integer. (or port (env :port) 5000))
+        session-store (MongoSessionStore. @mongo-db)]
+    (jetty/run-jetty (site app session-store) {:port port :join? false})))
 
 ; For interactive development:
 ; (.stop server)
