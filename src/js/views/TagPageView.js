@@ -8,8 +8,7 @@ var TagPageView = React.createClass({
       <div>
         <div className="header">
           <h3>Tag: {this.props.tag} (page {this.props.pageNumber})
-          {"\u00a0"}{"\u00a0"}
-          <a href="#/" className="button">Go back</a>
+          <a href="#/" className="button" style="margin-left: 5px;">Go back</a>
           </h3>
         </div>
         <PagedGallery
