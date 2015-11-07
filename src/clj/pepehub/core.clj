@@ -46,9 +46,11 @@
 (defn get-images [req]
   (let [limit (min 100 (integer-param req :limit 20))
         offset (integer-param req :offset 0)
+        tag-filter (get-in req [:params :tag])
+        criteria (if tag-filter {:tags tag-filter} {})
         images (map render-image
                     (q/with-collection @mongo-db "images"
-                      (q/find {})
+                      (q/find criteria)
                       (q/sort (sorted-map :_id -1))
                       (q/limit limit)
                       (q/skip offset)))]

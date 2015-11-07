@@ -31,7 +31,6 @@ var TagsControl = React.createClass({
     ApiServices.removeTag(this.props.imageId, tag).then(function(response) {
       this.setState({tags: response.tags});
     }.bind(this));
-    return false;
   },
 
   render: function() {
@@ -49,7 +48,9 @@ var ImagePageView = React.createClass({
   render: function() {
     return (
       <div className="imagePage">
-        <h3>Ultra Rare</h3>
+        <div className="header">
+          <h3>Ultra Rare</h3>
+        </div>
         <img className="detailImage" src={this.props.image.image_url} />
         <TagsControl tags={this.props.image.tags} imageId={this.props.image.id} />
       </div>
