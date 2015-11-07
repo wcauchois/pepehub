@@ -5,6 +5,7 @@
             [stencil.core :refer [render-file]]
             [clojure.data.json :as json]
             [monger.core :as mg]
+            [monger.query :as q]
             [stencil.loader]
             [clojure.java.io :as io]
             [monger.collection :as mc]
@@ -29,15 +30,28 @@
                        :image_url (str s3-prefix "img/" suffix)
                        :thumbnail_url (str s3-prefix "thumb/150/" suffix)))))
 
-(defn get-images [request]
-  (let [images (map render-image (mc/find-maps @*mongo-db* "images"))]
+(defn integer-param
+  ([req name] (integer-param req name nil))
+  ([req name default-value]
+   (let [value (get-in req [:params name])]
+     (if value (Integer/parseInt value) default-value))))
+
+(defn get-images [req]
+  (let [limit (min 100 (integer-param req :limit 20))
+        offset (integer-param req :offset 0)
+        images (map render-image
+                    (q/with-collection @*mongo-db* "images"
+                      (q/find {})
+                      (q/sort (sorted-map :_id -1))
+                      (q/limit limit)
+                      (q/skip offset)))]
     {:status 200
      :headers {"Content-Type" "application/json"}
      :body (json/write-str {"images" images})}))
 
 (defroutes app
   (GET "/" [] (home))
-  (GET "/get_images.json" request (get-images request))
+  (GET "/get_images.json" req (get-images req))
   (route/resources "/")
   (ANY "*" []
     (route/not-found (slurp (io/resource "404.html")))))

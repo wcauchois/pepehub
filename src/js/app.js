@@ -9,8 +9,12 @@ var _ = require('lodash'),
     GalleryConstants = require('./constants/GalleryConstants'),
     GalleryStore = require('./stores/GalleryStore');
 
+var _pageNumber = 0;
 function getPageState() {
-  return {images: GalleryStore.getAll()};
+  return {
+    images: GalleryStore.getAll(),
+    pageNumber: _pageNumber
+  };
 }
 
 var HomePage = React.createClass({
@@ -30,6 +34,18 @@ var HomePage = React.createClass({
     this.setState(getPageState());
   },
 
+  onPageNext: function() {
+    _pageNumber++;
+    updateGallery();
+    return false;
+  },
+
+  onPagePrev: function() {
+    _pageNumber = Math.max(0, _pageNumber - 1);
+    updateGallery();
+    return false;
+  },
+
   render: function() {
     var imageElements = _.map(this.state.images, function(image) {
       return (
@@ -39,24 +55,43 @@ var HomePage = React.createClass({
       );
     });
     return (
-      <div>
-        {imageElements}
+      <div className="container">
+        <div>
+          {imageElements}
+        </div>
+        <div>
+          <a href="#" className="button" onClick={this.onPagePrev}>Previous page</a>
+          <a href="#" className="button" onClick={this.onPageNext}>Next page</a>
+        </div>
       </div>
     );
   }
 });
+
+var apiServices = {
+  getImages: function(params) {
+    return Promise.resolve($.getJSON('/get_images.json', (params || {})));
+  }
+};
+
+var PAGE_SIZE = 40;
+function updateGallery() {
+  apiServices.getImages({
+    offset: _pageNumber * PAGE_SIZE,
+    limit: PAGE_SIZE
+  }).then(function(response) {
+    AppDispatcher.dispatch({
+      actionType: GalleryConstants.IMAGES_UPDATED,
+      images: response.images
+    });
+  });
+}
 
 global.renderPage = function(el) {
   ReactDOM.render(
     <HomePage />,
     el
   );
-
-  Promise.resolve($.getJSON('/get_images.json')).then(function(response) {
-    AppDispatcher.dispatch({
-      actionType: GalleryConstants.IMAGES_UPDATED,
-      images: response.images
-    });
-  });
+  updateGallery();
 };
 
