@@ -49,7 +49,9 @@ var ImagePageView = React.createClass({
     return (
       <div className="imagePage">
         <div className="header">
-          <h3>Ultra Rare</h3>
+          <h3>
+            Ultra Rare
+          </h3>
         </div>
         <img className="detailImage" src={this.props.image.image_url} />
         <TagsControl tags={this.props.image.tags} imageId={this.props.image.id} />
