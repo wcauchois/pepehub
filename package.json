@@ -12,9 +12,11 @@
   "author": "Bill Cauchois <wcauchois@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "basejs": "^1.1.1",
     "bluebird": "^2.10.2",
     "browserify": "^11.2.0",
     "classnames": "^2.2.0",
+    "colors": "^1.1.2",
     "director": "^1.2.8",
     "flux": "^2.1.1",
     "gulp": "^3.9.0",
@@ -27,7 +29,8 @@
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "reactify": "^1.1.1",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^1.1.0",
+    "yargs": "^3.29.0"
   },
   "engines": {
     "node": "4.2.2"

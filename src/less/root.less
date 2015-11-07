@@ -2,8 +2,21 @@ body {
   font-family: sans-serif;
 }
 
-.image {
-  display: inline-block;
+.gallery {
+  .galleryThumb {
+    display: inline-block;
+    border: 2px solid #BD00AF;
+    margin: 10px;
+    padding: 10px;
+    width: 150px;
+    min-height: 230px;
+    vertical-align: top;
+
+    transition: border-color 0.5s;
+    -webkit-transition: border-color 0.5s;
+
+    &:hover {border-color: #F142E4;}
+  }
 }
 
 .button {
@@ -19,3 +32,50 @@ body {
     background-color: #eee;
   }
 }
+
+.imagePage {
+  .detailImage {
+    max-width: 500px;
+    max-height: 500px;
+  }
+}
+
+.tagsControl {
+  .tagContainer {
+    margin: 5px;
+    background-color: #2041B7;
+    display: inline-block;
+    border-radius: 10px;
+
+    a {
+      text-decoration: none;
+      color: white;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 5px;
+    }
+
+    .removeTag {
+      display: inline-block;
+      padding: 5px;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+
+      &:hover {background-color: #FF006A;}
+    }
+  }
+
+  .addTagInput {
+    font-size: 16px;
+    margin-left: 5px;
+    position: relative;
+    top: 1px;
+    width: 200px;
+  }
+
+  &.noRemoval .removeTag {display: none;}
+
+}
+

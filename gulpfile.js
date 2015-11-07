@@ -4,15 +4,27 @@ var gulp = require('gulp'),
     reactify = require('reactify'),
     source = require('vinyl-source-stream'),
     uglify = require('gulp-uglify'),
-    streamify = require('gulp-streamify');
+    streamify = require('gulp-streamify'),
+    argv = require('yargs').argv,
+    colors = require('colors');
+
+var devMode = (typeof argv.dev !== 'undefined');
+if (devMode) {
+  console.log("Dev mode: not minifying scripts".green);
+}
 
 gulp.task('scripts', function() {
-  browserify('src/js/app.js')
+  var basePipe = browserify('src/js/app.js')
     .transform(reactify)
     .bundle()
     .pipe(source('bundle.js'))
-    .pipe(streamify(uglify()))
-    .pipe(gulp.dest('resources/public/build/scripts'));
+  var finalPipe;
+  if (devMode) {
+    finalPipe = basePipe;
+  } else {
+    finalPipe = basePipe.pipe(streamify(uglify()))
+  }
+  finalPipe.pipe(gulp.dest('resources/public/build/scripts'));
 });
 
 gulp.task('styles', function() {
