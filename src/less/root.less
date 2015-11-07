@@ -1,19 +1,34 @@
 body {
   font-family: sans-serif;
+  margin: 0;
+}
+
+.logo {
+  background: #52DA52;
+  color: white;
+  font-style: italic;
+  font-weight: bold;
+  cursor: default;
+  padding: 5px;
+  font-size: 18px;
+}
+
+.container {
+  margin: 10px;
 }
 
 .gallery {
   .galleryThumb {
     display: inline-block;
-    border: 2px solid #BD00AF;
+    border: 2px solid #F3C5EF;
     margin: 10px;
     padding: 10px;
     width: 150px;
     min-height: 230px;
     vertical-align: top;
 
-    transition: border-color 0.5s;
-    -webkit-transition: border-color 0.5s;
+    transition: border-color 0.2s;
+    -webkit-transition: border-color 0.2s;
 
     &:hover {border-color: #F142E4;}
   }
