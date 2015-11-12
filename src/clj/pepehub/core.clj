@@ -15,6 +15,13 @@
             [clojure.java.io :as io]
             [monger.collection :as mc]
             [ring.adapter.jetty :as jetty]
+
+            [langohr.core      :as rmq]
+            [langohr.channel   :as lch]
+            [langohr.queue     :as lq]
+            [langohr.consumers :as lc]
+            [langohr.basic     :as lb]
+
             [environ.core :refer [env]])
   (:import org.bson.types.ObjectId))
 
