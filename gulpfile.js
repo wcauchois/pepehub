@@ -6,7 +6,8 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     streamify = require('gulp-streamify'),
     argv = require('yargs').argv,
-    colors = require('colors');
+    colors = require('colors'),
+    hashDigest = require('./lib/hash-digest');
 
 var devMode = (typeof argv.dev !== 'undefined');
 if (devMode) {
@@ -24,7 +25,9 @@ gulp.task('scripts', function() {
   } else {
     finalPipe = basePipe.pipe(streamify(uglify()))
   }
-  finalPipe.pipe(gulp.dest('resources/public/build/scripts'));
+  finalPipe
+    .pipe(hashDigest())
+    .pipe(gulp.dest('resources/public/build/scripts'));
 });
 
 gulp.task('styles', function() {
