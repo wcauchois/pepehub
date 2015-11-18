@@ -1,35 +1,33 @@
 (ns pepehub.core
   (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
             [compojure.route :as route]
-            [stencil.core :refer [render-file]]
+            [stencil.loader]
+            [clojure.java.io :as io]
             [clojure.data.json :as json]
+            [stencil.core :refer [render-file]]
+
+            [monger.core :as mg]
+            [monger.query :as mq]
+            [monger.operators :refer :all]
+            [monger.collection :as mc]
+
+            [ring.adapter.jetty :as jetty]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.session :refer [wrap-session]]
             [ring.middleware.session.store :refer [SessionStore]]
             [ring.middleware.stacktrace :refer [wrap-stacktrace]]
             [ring.util.response :refer :all]
-            [monger.core :as mg]
-            [monger.query :as mq]
-            [monger.operators :refer :all]
-            [stencil.loader]
-            [clojure.java.io :as io]
-            [monger.collection :as mc]
-            [ring.adapter.jetty :as jetty]
 
-            [langohr.core      :as rmq]
-            [langohr.channel   :as lch]
-            [langohr.queue     :as lq]
-            [langohr.consumers :as lc]
             [langohr.basic     :as lb]
 
             [pepehub.queues :as q]
+            [pepehub.utils :refer :all]
+            [pepehub.mongo :refer :all]
 
             [environ.core :refer [env]])
   (:import org.bson.types.ObjectId))
 
-(def mongo-conn (atom nil))
-(def mongo-db (atom nil))
 (def rmq-ch (atom nil))
 
 (defn home [req]
@@ -144,7 +142,7 @@
 
 (def dev-mode? (= (env :lein-env) "development"))
 
-(defn bundle-version [] (-> "build/bundle.js.hash" io/resource slurp .trim))
+(defn bundle-version [] (-> "build/bundle.js.hash" load-resource .trim))
 
 (defn get-bundle [req]
   (let [current-version (bundle-version)
@@ -158,7 +156,7 @@
     (if (and (= current-version requested-version) (not no-cache))
       {:status 304 :headers response-headers :body ""}
       {:status 200 :headers response-headers
-       :body (slurp (io/resource "build/bundle.js"))})))
+       :body (load-resource "build/bundle.js")})))
 
 (defroutes app
   (GET "/" req (home req))
@@ -171,7 +169,7 @@
   (GET "/bundle.js" req (get-bundle req))
   (route/resources "/")
   (ANY "*" []
-    (route/not-found (slurp (io/resource "404.html")))))
+    (route/not-found (load-resource "404.html"))))
 
 (defn site [routes session-store]
   (defn with-opts [routes middleware opts] (middleware routes opts))
@@ -187,9 +185,7 @@
 
 (defn -main [& [port]]
   (stencil.loader/set-cache (clojure.core.cache/ttl-cache-factory {} :ttl 0))
-  (let [{:keys [conn db]} (mg/connect-via-uri (env :mongolab-uri))]
-    (reset! mongo-conn conn)
-    (reset! mongo-db db))
+  (connect-mongo!)
   (let [{:keys [ch]} (q/connect-and-install-shutdown-hook)]
     (reset! rmq-ch ch))
   (let [port (Integer. (or port (env :port) 5000))
