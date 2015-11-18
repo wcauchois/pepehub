@@ -1,6 +1,6 @@
 (ns pepehub.worker
   (:require [monger.core :as mg]
-            [monger.query :as q]
+            [monger.query :as mq]
             [monger.operators :refer :all]
             [monger.collection :as mc]
 
@@ -10,19 +10,20 @@
             [langohr.consumers :as lc]
             [langohr.basic     :as lb]
 
-            [pepehub.queues :refer :all]
+            [clojure.edn :as edn]
+
+            [pepehub.queues :as q]
 
             [environ.core :refer [env]]))
 
-(defn message-handler
+(defn refresh-tags-handler
   [ch {:keys [content-type delivery-tag] :as meta} ^bytes payload]
-  (println (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s"
-                   (String. payload "UTF-8") delivery-tag content-type)))
+  (let [parsed-payload (edn/read-string (String. payload "UTF-8"))]
+    (println (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s"
+                     parsed-payload delivery-tag content-type))))
 
 (defn -main [& args]
-  (let [conn (rmq/connect {:uri amqp-url})
-        ch (lch/open conn)]
+  (let [{:keys [conn ch]} (q/connect-and-install-shutdown-hook)]
     (lq/declare ch "pepehub.refresh-tags" {:exclusive false :auto-delete true})
-    (lc/subscribe ch "pepehub.refresh-tags" message-handler {:auto-ack true})
-    (println "[consumer] Started listening")
-    (.addShutdownHook (Runtime/getRuntime) (Thread. #(do (rmq/close ch) (rmq/close conn))))))
+    (lc/subscribe ch "pepehub.refresh-tags" refresh-tags-handler {:auto-ack true})
+    (println "[consumer] Started listening")))

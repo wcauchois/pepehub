@@ -10,7 +10,7 @@
             [ring.middleware.stacktrace :refer [wrap-stacktrace]]
             [ring.util.response :refer :all]
             [monger.core :as mg]
-            [monger.query :as q]
+            [monger.query :as mq]
             [monger.operators :refer :all]
             [stencil.loader]
             [clojure.java.io :as io]
@@ -23,11 +23,14 @@
             [langohr.consumers :as lc]
             [langohr.basic     :as lb]
 
+            [pepehub.queues :as q]
+
             [environ.core :refer [env]])
   (:import org.bson.types.ObjectId))
 
 (def mongo-conn (atom nil))
 (def mongo-db (atom nil))
+(def rmq-ch (atom nil))
 
 (defn home [req]
   {:status 200
@@ -61,11 +64,11 @@
         tag-filter (get-in req [:params :tag])
         criteria (if tag-filter {:tags tag-filter} {})
         images (map render-image
-                    (q/with-collection @mongo-db "images"
-                      (q/find criteria)
-                      (q/sort (sorted-map :_id -1))
-                      (q/limit limit)
-                      (q/skip offset)))]
+                    (mq/with-collection @mongo-db "images"
+                      (mq/find criteria)
+                      (mq/sort (sorted-map :_id -1))
+                      (mq/limit limit)
+                      (mq/skip offset)))]
     (json-response {"images" images})))
 
 (defn find-image [id]
@@ -82,10 +85,14 @@
   (defn return-tags [id]
     (json-response {"tags"
                     (or
-                     (:tags (q/with-collection @mongo-db "images"
-                              (q/find {:_id id})
-                              (q/fields [:tags])))
+                     (:tags (mq/with-collection @mongo-db "images"
+                              (mq/find {:_id id})
+                              (mq/fields [:tags])))
                      [])})))
+
+(defn enqueue-refresh-tags []
+  (lb/publish @rmq-ch q/default-exchange-name q/refresh-tags-qname
+              (pr-str {}) {:content-type "application/edn"}))
 
 (defmacro tag-modifier [oper]
   `(fn [req#]
@@ -93,6 +100,7 @@
            updated-doc#
            (mc/find-and-modify @mongo-db "images" {:_id id#}
                                {~oper {:tags (get-in req# [:params :tag])}} {:return-new true})]
+       (enqueue-refresh-tags)
        (json-response {"tags" (or (:tags updated-doc#) [])}))))
 
 (def add-tag (tag-modifier $addToSet))
@@ -134,7 +142,7 @@
     (mc/remove @mongo-db "images" {:_id id})
     (json-response {"result" "OK"})))
 
-(def dev-mode? (= (:lein-env env) "development"))
+(def dev-mode? (= (env :lein-env) "development"))
 
 (defn bundle-version [] (-> "build/bundle.js.hash" io/resource slurp .trim))
 
@@ -182,6 +190,8 @@
   (let [{:keys [conn db]} (mg/connect-via-uri (env :mongolab-uri))]
     (reset! mongo-conn conn)
     (reset! mongo-db db))
+  (let [{:keys [ch]} (q/connect-and-install-shutdown-hook)]
+    (reset! rmq-ch ch))
   (let [port (Integer. (or port (env :port) 5000))
         session-store (MongoSessionStore. @mongo-db)]
     (jetty/run-jetty (site app session-store) {:port port :join? false})))
