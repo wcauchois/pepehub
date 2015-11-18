@@ -6,6 +6,7 @@
                  [environ "1.0.1"]
                  [ring/ring-jetty-adapter "1.4.0"]
                  [ring/ring-core "1.4.0"]
+                 [ring/ring-devel "1.4.0"]
                  [com.novemberain/langohr "3.3.0"]
                  [stencil "0.5.0"]
                  [org.clojure/data.json "0.2.6"]

@@ -7,6 +7,7 @@
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.session :refer [wrap-session]]
             [ring.middleware.session.store :refer [SessionStore]]
+            [ring.middleware.stacktrace :refer [wrap-stacktrace]]
             [ring.util.response :refer :all]
             [monger.core :as mg]
             [monger.query :as q]
@@ -28,7 +29,7 @@
 (def mongo-conn (atom nil))
 (def mongo-db (atom nil))
 
-(defn home []
+(defn home [req]
   {:status 200
    :headers {"Content-Type" "text/html"}
    :body (render-file "templates/home" {})})
@@ -133,24 +134,48 @@
     (mc/remove @mongo-db "images" {:_id id})
     (json-response {"result" "OK"})))
 
+(def dev-mode? (= (:lein-env env) "development"))
+
+(defn bundle-version [] (-> "build/bundle.js.hash" io/resource slurp .trim))
+
+(defn get-bundle [req]
+  (let [current-version (bundle-version)
+        headers (:headers req)
+        requested-version (get headers "if-none-match")
+        no-cache
+        (or (.contains (-> headers (get "cache-control" "") .toLowerCase) "no-cache")
+            (.equalsIgnoreCase (get headers "pragma" "") "no-cache"))
+        response-headers {"ETag" current-version
+                          "Content-Type" "text/javascript"}]
+    (if (and (= current-version requested-version) (not no-cache))
+      {:status 304 :headers response-headers :body ""}
+      {:status 200 :headers response-headers
+       :body (slurp (io/resource "build/bundle.js"))})))
+
 (defroutes app
-  (GET "/" [] (home))
+  (GET "/" req (home req))
   (GET "/get_images.json" req (get-images req))
   (GET "/get_image.json" req (get-image req))
   (GET "/add_tag.json" req (add-tag req))
   (GET "/remove_tag.json" req (remove-tag req))
   (POST "/delete_image.json" req ((require-admin delete-image) req))
   (GET "/admin_login" req (admin-login req))
+  (GET "/bundle.js" req (get-bundle req))
   (route/resources "/")
   (ANY "*" []
     (route/not-found (slurp (io/resource "404.html")))))
 
 (defn site [routes session-store]
-  (let [with-opts (fn [routes middleware opts] (middleware routes opts))]
-    (-> routes
-        wrap-keyword-params
-        wrap-params
-        (with-opts wrap-session {:store session-store}))))
+  (defn with-opts [routes middleware opts] (middleware routes opts))
+  (defn optionally [routes b middleware & [opts]]
+    (if b
+      (if opts (middleware routes opts) (middleware routes))
+      routes))
+  (-> routes
+      wrap-keyword-params
+      wrap-params
+      (with-opts wrap-session {:store session-store})
+      (optionally dev-mode? wrap-stacktrace)))
 
 (defn -main [& [port]]
   (stencil.loader/set-cache (clojure.core.cache/ttl-cache-factory {} :ttl 0))

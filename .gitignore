@@ -15,4 +15,4 @@ pom.xml.asc
 /profiles.clj
 *.swp
 /node_modules
-/resources/public/build
+build

@@ -27,7 +27,7 @@ gulp.task('scripts', function() {
   }
   finalPipe
     .pipe(hashDigest())
-    .pipe(gulp.dest('resources/public/build/scripts'));
+    .pipe(gulp.dest('resources/build'));
 });
 
 gulp.task('styles', function() {
