@@ -1,7 +1,9 @@
 var director = require('director'),
     Base = require('basejs'),
     _ = require('lodash'),
-    ReactDOM = require('react-dom');
+    ReactDOM = require('react-dom'),
+    React = require('react'),
+    ChromeView = require('../views/ChromeView');
 
 var PageRouter = Base.extend({
   constructor: function() {
@@ -20,8 +22,9 @@ var PageRouter = Base.extend({
   },
 
   renderPage: function(page, data) {
+    var pageComponent = page.createComponent(data);
     ReactDOM.render(
-      page.createComponent(data),
+      <ChromeView pageComponent={pageComponent} />,
       document.getElementById('render')
     );
   },

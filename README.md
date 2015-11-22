@@ -1,4 +1,9 @@
 
+Development
+---
+
+Use `gulp watch --dev` to emit an unminified bundle.
+
 Buildpacks for Heroku
 ---
 

@@ -140,7 +140,7 @@
     (mc/remove @mongo-db "images" {:_id id})
     (json-response {"result" "OK"})))
 
-(def dev-mode? (= (env :lein-env) "development"))
+(defn dev-mode? [] (= (env :lein-env) "development"))
 
 (defn bundle-version [] (-> "build/bundle.js.hash" load-resource .trim))
 
@@ -181,7 +181,7 @@
       wrap-keyword-params
       wrap-params
       (with-opts wrap-session {:store session-store})
-      (optionally dev-mode? wrap-stacktrace)))
+      (optionally (dev-mode?) wrap-stacktrace)))
 
 (defn -main [& [port]]
   (stencil.loader/set-cache (clojure.core.cache/ttl-cache-factory {} :ttl 0))

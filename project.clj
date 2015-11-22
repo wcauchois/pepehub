@@ -8,6 +8,7 @@
                  [ring/ring-core "1.4.0"]
                  [ring/ring-devel "1.4.0"]
                  [com.novemberain/langohr "3.3.0"]
+                 [clj-http "2.0.0"]
                  [stencil "0.5.0"]
                  [org.clojure/data.json "0.2.6"]
                  [com.novemberain/monger "3.0.0-rc2"]
