@@ -3,14 +3,87 @@ body {
   margin: 0;
 }
 
+.button {
+  color: black;
+  display: inline-block;
+  text-decoration: none;
+  padding: 5px;
+  margin: 0 5px;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  font-size: 1em;
+  background-color: white;
+
+  &:hover {
+    background-color: #eee;
+  }
+}
+
 .logo {
   background: #52DA52;
-  color: white;
-  font-style: italic;
-  font-weight: bold;
-  cursor: default;
   padding: 5px;
-  font-size: 18px;
+  overflow: hidden;
+
+  .logoText {
+    cursor: default;
+    font-size: 18px;
+    color: white;
+    font-style: italic;
+    font-weight: bold;
+    float: left;
+    line-height: 30px;
+  }
+
+  .uploadButton {
+    float: right;
+  }
+}
+
+.modalContainer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1050;
+  overflow: hidden;
+  background-color: rgba(1, 1, 1, 0.3);
+
+  .modalDialog {
+    width: 500px;
+    background-color: white;
+    margin: 30px auto;
+    padding: 10px;
+
+    .modalTitle {
+      overflow: hidden;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #eee;
+
+      h4 {
+        float: left;
+        font-size: 18px;
+        margin: 0 0 10px 0;
+      }
+
+      .close {
+        float: right;
+
+        a {
+          text-decoration: none;
+          color: #aaa;
+
+          &:hover {color: #000;}
+        }
+      }
+    }
+  }
+}
+
+.hidden {display: none;}
+
+.previewImage {
+  img {max-height: 200px;}
 }
 
 .container {
@@ -33,20 +106,6 @@ body {
     -webkit-transition: border-color 0.2s;
 
     &:hover {border-color: #F142E4;}
-  }
-}
-
-.button {
-  color: black;
-  display: inline-block;
-  text-decoration: none;
-  padding: 5px;
-  margin: 0 5px;
-  border: 1px solid #eee;
-  border-radius: 3px;
-
-  &:hover {
-    background-color: #eee;
   }
 }
 

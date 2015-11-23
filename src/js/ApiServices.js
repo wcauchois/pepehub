@@ -15,5 +15,14 @@ module.exports = {
 
   removeTag: function(id, tag) {
     return Promise.resolve($.getJSON('/remove_tag.json', {id: id, tag: tag}));
+  },
+
+  getSignedRequest: function(opts) {
+    return Promise.resolve($.ajax({
+      type: "POST",
+      url: '/sign_s3',
+      data: opts,
+      dataType: 'json'
+    }));
   }
 };

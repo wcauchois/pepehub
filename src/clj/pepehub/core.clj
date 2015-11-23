@@ -4,6 +4,7 @@
             [stencil.loader]
             [clojure.java.io :as io]
             [clojure.data.json :as json]
+            [clojure.string :as str]
             [stencil.core :refer [render-file]]
 
             [monger.core :as mg]
@@ -21,6 +22,7 @@
 
             [langohr.basic     :as lb]
 
+            [pepehub.s3 :as s3]
             [pepehub.queues :as q]
             [pepehub.utils :refer :all]
             [pepehub.mongo :refer :all]
@@ -158,6 +160,23 @@
       {:status 200 :headers response-headers
        :body (load-resource "build/bundle.js")})))
 
+; Based on https://github.com/lift/framework/blob/master/core/util/src/main/scala/net/liftweb/util/HttpHelpers.scala#L105
+(defn append-params [url params]
+  (let [url-sep (if (.contains url "?") "&" "?")
+        enc #(java.net.URLEncoder/encode % "utf-8")]
+    (str url url-sep
+         (str/join "&" (map (fn [[k v]] (format "%s=%s" (enc k) (enc v))) params)))))
+
+(defn sign-s3 [req]
+  (let [file-name (get-in req [:params :file_name])
+        file-type (get-in req [:params :file_type])
+        _ (when-not (#{"image/jpg" "image/jpeg" "image/png"} file-type)
+            (throw (Exception. "Unsupported file type")))
+        signing-opts {"x-amz-acl" "public-read"}]
+    (json-response
+     {"url"
+      (s3/generate-presigned-url file-name file-type :put signing-opts)})))
+
 (defroutes app
   (GET "/" req (home req))
   (GET "/get_images.json" req (get-images req))
@@ -167,6 +186,7 @@
   (POST "/delete_image.json" req ((require-admin delete-image) req))
   (GET "/admin_login" req (admin-login req))
   (GET "/bundle.js" req (get-bundle req))
+  (POST "/sign_s3" req (sign-s3 req))
   (route/resources "/")
   (ANY "*" []
     (route/not-found (load-resource "404.html"))))
