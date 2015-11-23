@@ -71,9 +71,14 @@ var UploadModal = React.createClass({
         file_name: file.name,
         file_type: file.type
       }).then(function(response) {
-        return uploadFile(file, response.url);
-      }).then(function() {
-        alert("Upload successful!");
+        return uploadFile(file, response.url).then(function() {
+          return response.suffix;
+        });
+      }).then(function(suffix) {
+        return ApiServices.addImage({suffix: suffix});
+      }).then(function(newImage) {
+        // TODO: Better success behavior
+        window.location.reload();
       });
     }
   },

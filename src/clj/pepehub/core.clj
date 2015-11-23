@@ -169,24 +169,34 @@
 
 (defn sign-s3 [req]
   (let [file-name (get-in req [:params :file_name])
+        ; TODO: Check for dupe names and such (GLARING BUG)
+        s3-key (str "img/" file-name)
         file-type (get-in req [:params :file_type])
         _ (when-not (#{"image/jpg" "image/jpeg" "image/png"} file-type)
             (throw (Exception. "Unsupported file type")))
         signing-opts {"x-amz-acl" "public-read"}]
     (json-response
      {"url"
-      (s3/generate-presigned-url file-name file-type :put signing-opts)})))
+      (s3/generate-presigned-url s3-key file-type :put signing-opts)
+      "suffix" file-name})))
+
+(defn add-image [req]
+  (let [suffix (get-in req [:params :suffix])
+        doc (mc/insert-and-return @mongo-db "images" {:suffix suffix})]
+    (json-response (render-image doc))))
 
 (defroutes app
   (GET "/" req (home req))
+  ; TODO: Come up with better ordering for routes
   (GET "/get_images.json" req (get-images req))
   (GET "/get_image.json" req (get-image req))
-  (GET "/add_tag.json" req (add-tag req))
   (GET "/remove_tag.json" req (remove-tag req))
-  (POST "/delete_image.json" req ((require-admin delete-image) req))
   (GET "/admin_login" req (admin-login req))
   (GET "/bundle.js" req (get-bundle req))
   (POST "/sign_s3" req (sign-s3 req))
+  (POST "/add_image.json" req (add-image req))
+  (POST "/add_tag.json" req (add-tag req))
+  (POST "/delete_image.json" req ((require-admin delete-image) req))
   (route/resources "/")
   (ANY "*" []
     (route/not-found (load-resource "404.html"))))

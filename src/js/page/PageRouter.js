@@ -31,6 +31,10 @@ var PageRouter = Base.extend({
 
   init: function(initialRoute) {
     this.router.init(initialRoute);
+  },
+
+  navigate: function(newRoute) {
+    this.router.setRoute(newRoute);
   }
 });
 
