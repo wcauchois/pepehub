@@ -4,6 +4,13 @@ body {
 }
 
 .button {
+  &.disabled {
+    color: #aaa;
+    cursor: default;
+
+    &:hover {background-color: white;}
+  }
+
   color: black;
   display: inline-block;
   text-decoration: none;

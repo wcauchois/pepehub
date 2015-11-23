@@ -1,6 +1,7 @@
 var React = require('react'),
     _ = require('lodash'),
-    ApiServices = require('../ApiServices');
+    ApiServices = require('../ApiServices'),
+    classNames = require('classnames');
 
 function uploadFile(file, signedRequest) {
   return new Promise(function(resolve, reject) {
@@ -22,7 +23,9 @@ function uploadFile(file, signedRequest) {
 var UploadModal = React.createClass({
   getInitialState: function() {
     return {
-      previewImage: null
+      previewImage: null,
+      fileSelected: false,
+      uploading: false
     }
   },
 
@@ -52,6 +55,7 @@ var UploadModal = React.createClass({
             this.setState({previewImage: e.target.result});
           }.bind(this);
           reader.readAsDataURL(this.fileInput.files[0]);
+          this.setState({fileSelected: true});
         }
       }.bind(this);
     }
@@ -63,10 +67,8 @@ var UploadModal = React.createClass({
 
   doSubmit: function(event) {
     var file = (this.fileInput.files || [])[0];
-    if (!file) {
-      // TODO: Disable button if this is the case
-      alert("You must select a file!");
-    } else {
+    if (file && this.canSubmit()) {
+      this.setState({uploading: true});
       ApiServices.getSignedRequest({
         file_name: file.name,
         file_type: file.type
@@ -81,6 +83,10 @@ var UploadModal = React.createClass({
         window.location.reload();
       });
     }
+  },
+
+  canSubmit: function() {
+    return this.state.fileSelected && !this.state.uploading;
   },
 
   render: function() {
@@ -107,7 +113,7 @@ var UploadModal = React.createClass({
             {previewImage}
             <input type="file" className="hidden" ref={this.gotFileInput} />
             <br />
-            <a href="#" className="button" onClick={this.doSubmit}>Submit</a>
+            <a href="#" className={classNames({button: true, disabled: !this.canSubmit()})}  onClick={this.doSubmit}>Submit</a>
           </div>
         </div>
       </div>
