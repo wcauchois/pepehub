@@ -117,7 +117,7 @@
     (mc/find-one-as-map (.db store) "sessions" {:_id key}))
   (write-session [store key data]
     (let [key (or key (generate-new-random-key))]
-      (mc/insert (.db store) "sessions" (assoc data :_id key))
+      (mc/update (.db store) "sessions" {:_id key} data {:upsert true})
       key))
   (delete-session [store key]
     (mc/remove (.db store) "sessions" {:_id key})
