@@ -79,9 +79,8 @@ var UploadModal = React.createClass({
       }).then(function(suffix) {
         return ApiServices.addImage({suffix: suffix});
       }).then(function(newImage) {
-        // TODO: Better success behavior
-        window.location.reload();
-      });
+        this.props.router.navigate('/image/' + newImage.id);
+      }.bind(this));
     }
   },
 
@@ -109,11 +108,11 @@ var UploadModal = React.createClass({
           </div>
           <div className="modalContent">
             Upload a file or whatever<br />
-            <a href="#" className="button" onClick={this.selectFileClicked}>Select File</a>
+            <span className="button" onClick={this.selectFileClicked}>Select File</span>
             {previewImage}
             <input type="file" className="hidden" ref={this.gotFileInput} />
             <br />
-            <a href="#" className={classNames({button: true, disabled: !this.canSubmit()})}  onClick={this.doSubmit}>Submit</a>
+            <span className={classNames({button: true, disabled: !this.canSubmit()})}  onClick={this.doSubmit}>Submit</span>
           </div>
         </div>
       </div>

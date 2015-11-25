@@ -10,7 +10,8 @@ var ChromeView = React.createClass({
     };
   },
 
-  uploadClicked: function() {
+  uploadClicked: function(evt) {
+    evt.preventDefault();
     this.setState({uploadModal: true});
   },
 
@@ -21,7 +22,7 @@ var ChromeView = React.createClass({
   render: function() {
     var uploadModal;
     if (this.state.uploadModal) {
-      uploadModal = <UploadModal onClose={this.uploadModalClosed} />
+      uploadModal = <UploadModal onClose={this.uploadModalClosed} router={this.props.router} />
     }
     return (
       <div className={classNames({chromeContainer: true, modalOpen: this.state.uploadModal})}>
@@ -30,7 +31,7 @@ var ChromeView = React.createClass({
             PepeHub v0.1{String.fromCharCode(945)}
           </div>
           <div className="uploadButton">
-            <a href="#" className="button" onClick={this.uploadClicked}>Upload</a>
+            <span className="button" onClick={this.uploadClicked}>Upload</span>
           </div>
         </div>
         <div className="container">

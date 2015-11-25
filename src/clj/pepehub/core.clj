@@ -107,6 +107,7 @@
 (def remove-tag (tag-modifier $pull))
 
 (defn generate-new-random-key []
+  "For the session store"
   (str (java.util.UUID/randomUUID)))
 
 (deftype MongoSessionStore [db]

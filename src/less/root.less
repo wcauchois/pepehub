@@ -4,6 +4,7 @@ body {
 }
 
 .button {
+  // Put first to override enabled styles
   &.disabled {
     color: #aaa;
     cursor: default;
@@ -11,11 +12,11 @@ body {
     &:hover {background-color: white;}
   }
 
+  cursor: pointer;
   color: black;
   display: inline-block;
   text-decoration: none;
   padding: 5px;
-  margin: 0 5px;
   border: 1px solid #eee;
   border-radius: 3px;
   font-size: 1em;
