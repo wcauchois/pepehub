@@ -33,9 +33,10 @@
 (def rmq-ch (atom nil))
 
 (defn home [req]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body (render-file "templates/home" {})})
+  (let [is-admin? (get-in req [:session :admin])]
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (render-file "templates/home" {:admin (or is-admin? false)})}))
 
 (defn convert-id [doc]
   (dissoc (assoc doc :id (.toString (:_id doc))) :_id))

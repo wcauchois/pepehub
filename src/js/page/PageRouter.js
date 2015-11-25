@@ -8,6 +8,7 @@ var director = require('director'),
 var PageRouter = Base.extend({
   constructor: function() {
     this.router = new director.Router();
+    this.options = {};
   },
 
   register: function(route, pageClass) {
@@ -24,12 +25,13 @@ var PageRouter = Base.extend({
   renderPage: function(page, data) {
     var pageComponent = page.createComponent(data);
     ReactDOM.render(
-      <ChromeView pageComponent={pageComponent} router={this} />,
+      <ChromeView pageComponent={pageComponent} router={this} admin={this.options.admin} />,
       document.getElementById('render')
     );
   },
 
-  init: function(initialRoute) {
+  init: function(initialRoute, options) {
+    this.options = options;
     this.router.init(initialRoute);
   },
 

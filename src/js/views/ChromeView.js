@@ -24,15 +24,21 @@ var ChromeView = React.createClass({
     if (this.state.uploadModal) {
       uploadModal = <UploadModal onClose={this.uploadModalClosed} router={this.props.router} />
     }
+    var uploadButton;
+    if (this.props.admin) {
+      uploadButton = (
+        <div className="uploadButton">
+          <span className="button" onClick={this.uploadClicked}>Upload</span>
+        </div>
+      );
+    }
     return (
       <div className={classNames({chromeContainer: true, modalOpen: this.state.uploadModal})}>
         <div className="logo">
           <div className="logoText">
             PepeHub v0.1{String.fromCharCode(945)}
           </div>
-          <div className="uploadButton">
-            <span className="button" onClick={this.uploadClicked}>Upload</span>
-          </div>
+          {uploadButton}
         </div>
         <div className="container">
           {this.props.pageComponent}

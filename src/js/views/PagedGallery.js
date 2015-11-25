@@ -24,7 +24,7 @@ var PagedGallery = React.createClass({
         <div>
           <GalleryView images={this.props.images} />
         </div>
-        <div>
+        <div className="pageButtons">
           <a href={this.navLink(-1)} className={prevPageClass} onClick={this.prevPageClicked}>Previous page</a>
           <a href={this.navLink(1)} className="button">Next page</a>
         </div>
