@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PepeHub - Configuration</title>
+  </head>
+  <body>
+    <table class="configs">
+      {{#config}}
+        <tr>
+          <form method="POST">
+            <td>{{name}}</td>
+            <td>
+            <input type="hidden" name="name" value="{{name}}">
+              {{#bool?}}
+                <input type="hidden" name="type" value="bool">
+                <select name="value">
+                  <option value="true"{{#value}} selected{{/value}}>true</option>
+                  <option value="false"{{^value}} selected{{/value}}>false</option>
+                </select>
+              {{/bool?}}
+
+              {{#string?}}
+                <input type="hidden" name="type" value="string">
+                <input type="text" name="value" placeholder="string" value="{{value}}">
+              {{/string?}}
+
+              {{#int?}}
+                <input type="hidden" name="type" value="int">
+                <input type="text" name="value" placeholder="integer" value="{{value}}">
+              {{/int?}}
+            </td>
+            <td>
+              <input type="submit" value="update">
+            </td>
+          </form>
+        </tr>
+      {{/config}}
+    </table>
+  </body>
+</html>

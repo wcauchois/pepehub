@@ -26,6 +26,7 @@
             [pepehub.queues :as q]
             [pepehub.utils :refer :all]
             [pepehub.mongo :refer :all]
+            [pepehub.runtime-config :as config]
 
             [environ.core :refer [env]])
   (:import org.bson.types.ObjectId))
@@ -199,6 +200,13 @@
   (POST "/add_image.json" req (add-image req))
   (POST "/add_tag.json" req (add-tag req))
   (POST "/delete_image.json" req ((require-admin delete-image) req))
+
+  (GET "/test_config" req (do
+                            (config/get "testBooleanValue" true)
+                            (config/get "testIntegerValue" 42)
+                            (json-response {"test-value" (config/get "testValue" "hello")})))
+  (ANY "/edit_config" req ((require-admin #(config/admin-page "/edit_config" %) req)))
+
   (route/resources "/")
   (ANY "*" []
     (route/not-found (load-resource "404.html"))))
@@ -212,12 +220,14 @@
   (-> routes
       wrap-keyword-params
       wrap-params
+      config/middleware
       (with-opts wrap-session {:store session-store})
       (optionally (dev-mode?) wrap-stacktrace)))
 
 (defn -main [& [port]]
   (stencil.loader/set-cache (clojure.core.cache/ttl-cache-factory {} :ttl 0))
   (connect-mongo!)
+  (config/start-refresher-thread!)
   (let [{:keys [ch]} (q/connect-and-install-shutdown-hook)]
     (reset! rmq-ch ch))
   (let [port (Integer. (or port (env :port) 5000))

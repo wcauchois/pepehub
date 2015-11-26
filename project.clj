@@ -8,6 +8,7 @@
                  [ring/ring-core "1.4.0"]
                  [ring/ring-devel "1.4.0"]
                  [com.novemberain/langohr "3.3.0"]
+                 [org.clojure/core.async "0.2.374"]
                  [com.amazonaws/aws-java-sdk "1.7.5" :exclusions [joda-time]]
                  [clj-time "0.11.0"]
                  [clj-http "2.0.0"]
@@ -16,7 +17,8 @@
                  [com.novemberain/monger "3.0.0-rc2"]
                  [compojure "1.4.0"]]
   :uberjar-name "pepehub-standalone.jar"
-  :plugins [[lein-environ "1.0.1"]]
+  :plugins [[lein-environ "1.0.1"]
+            [lein-cljfmt "0.3.0"]]
   :min-lein-version "2.0.0"
   :main pepehub.core
   :env {:s3-assets-bucket "pepehub-assets"}
