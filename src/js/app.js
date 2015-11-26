@@ -7,4 +7,3 @@ require('./page/TagPage');
 global.startApp = function(options) {
   PageRouter.init('/', options);
 };
-
