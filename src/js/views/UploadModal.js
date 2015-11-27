@@ -1,7 +1,8 @@
 var React = require('react'),
     _ = require('lodash'),
     ApiServices = require('../ApiServices'),
-    classNames = require('classnames');
+    classNames = require('classnames'),
+    Promise = require('bluebird');
 
 function uploadFile(file, signedRequest) {
   return new Promise(function(resolve, reject) {
@@ -20,18 +21,61 @@ function uploadFile(file, signedRequest) {
   });
 }
 
+function imageIsLoaded(src) {
+  return new Promise(function(resolve, reject) {
+    var image = new Image();
+    image.onload = function() { resolve(true); };
+    image.onerror = function() { resolve(false); };
+    image.src = src;
+  });
+}
+
+function waitForImage(src, nTimes) {
+  var maxTimes = 5;
+  nTimes = nTimes || maxTimes;
+  if (nTimes <= 0) {
+    return Promise.reject();
+  } else {
+    return (
+      Promise.delay(150)
+        .then(function() {
+          return imageIsLoaded(src);
+        })
+        .then(function(result) {
+          if (result) {
+            return true;
+          } else {
+            return waitForImage(src, nTimes - 1);
+          }
+        })
+    );
+  }
+}
+
+var LoadingBar = React.createClass({
+  render: function() {
+    return (
+      <div className="loadingBar">
+        <span className="stripes"></span>
+        <div className="content">{this.props.message}</div>
+      </div>
+    );
+  }
+});
+
 var UploadModal = React.createClass({
   getInitialState: function() {
     return {
       previewImage: null,
       fileSelected: false,
-      uploading: false
+      uploading: false,
+      loadingMessage: ''
     }
   },
 
-  closeClicked: function() {
+  closeClicked: function(event) {
+    event.preventDefault();
     this.props.onClose();
-    return false;
   },
 
   containerClicked: function(event) {
@@ -68,7 +112,10 @@ var UploadModal = React.createClass({
   doSubmit: function(event) {
     var file = (this.fileInput.files || [])[0];
     if (file && this.canSubmit()) {
-      this.setState({uploading: true});
+      this.setState({
+        uploading: true,
+        loadingMessage: 'Uploading image'
+      });
       ApiServices.getSignedRequest({
         file_name: file.name,
         file_type: file.type
@@ -79,6 +126,11 @@ var UploadModal = React.createClass({
       }).then(function(suffix) {
         return ApiServices.addImage({suffix: suffix});
       }).then(function(newImage) {
+        return waitForImage(newImage.thumbnail_url).then(function() {
+          return newImage;
+        });
+      }).then(function(newImage) {
+        this.setState({loadingMessage: ''});
         this.props.router.navigate('/image/' + newImage.id);
       }.bind(this));
     }
@@ -107,12 +159,14 @@ var UploadModal = React.createClass({
             </div>
           </div>
           <div className="modalContent">
-            Upload a file or whatever<br />
-            <span className="button" onClick={this.selectFileClicked}>Select File</span>
+            <div className="button selectFile" onClick={this.selectFileClicked}>Select File</div>
             {previewImage}
             <input type="file" className="hidden" ref={this.gotFileInput} />
-            <br />
-            <span className={classNames({button: true, disabled: !this.canSubmit()})}  onClick={this.doSubmit}>Submit</span>
+            <div className={classNames({button: true, disabled: !this.canSubmit(), submitButton: true})}
+              onClick={this.doSubmit}>Start Upload</div>
+            <div className={classNames({loadingBarContainer: true, closed: !this.state.loadingMessage})}>
+              <LoadingBar message={this.state.loadingMessage} />
+            </div>
           </div>
         </div>
       </div>

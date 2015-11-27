@@ -42,9 +42,10 @@
 (defn convert-id [doc]
   (dissoc (assoc doc :id (.toString (:_id doc))) :_id))
 
+(def s3-prefix (str "https://" (env :s3-assets-bucket) ".s3.amazonaws.com/"))
+
 (defn render-image [doc]
-  (let [suffix (:suffix doc)
-        s3-prefix (str "https://" (env :s3-assets-bucket) ".s3.amazonaws.com/")]
+  (let [suffix (:suffix doc)]
     (convert-id (assoc doc
                        :image_url (str s3-prefix "img/" suffix)
                        :thumbnail_url (str s3-prefix "thumb/150/" suffix)))))
