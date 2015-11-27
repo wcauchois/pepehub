@@ -25,7 +25,7 @@ var ChromeView = React.createClass({
       uploadModal = <UploadModal onClose={this.uploadModalClosed} router={this.props.router} />
     }
     var uploadButton;
-    if (this.props.admin) {
+    if (this.props.canUpload) {
       uploadButton = (
         <div className="uploadButton">
           <span className="button" onClick={this.uploadClicked}>Upload</span>

@@ -25,7 +25,7 @@ var PageRouter = Base.extend({
   renderPage: function(page, data) {
     var pageComponent = page.createComponent(data);
     ReactDOM.render(
-      <ChromeView pageComponent={pageComponent} router={this} admin={this.options.admin} />,
+      <ChromeView pageComponent={pageComponent} router={this} canUpload={this.options.canUpload} />,
       document.getElementById('render')
     );
   },

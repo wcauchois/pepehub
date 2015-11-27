@@ -33,11 +33,16 @@
 
 (def rmq-ch (atom nil))
 
+(defn can-upload-images? [] (config/get "allowImageUpload" true))
+
 (defn home [req]
-  (let [is-admin? (get-in req [:session :admin])]
+  (let [is-admin? (get-in req [:session :admin])
+        page-options
+        {"admin" (or is-admin? false)
+         "canUpload" (can-upload-images?)}]
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (render-file "templates/home" {:admin (or is-admin? false)})}))
+     :body (render-file "templates/home" {:options (json/write-str page-options)})}))
 
 (defn convert-id [doc]
   (dissoc (assoc doc :id (.toString (:_id doc))) :_id))
@@ -172,6 +177,8 @@
          (str/join "&" (map (fn [[k v]] (format "%s=%s" (enc k) (enc v))) params)))))
 
 (defn sign-s3 [req]
+  (when-not (can-upload-images?)
+    (throw (Exception. "Uploading images is not allowed")))
   (let [file-name (get-in req [:params :file_name])
         s3-key
         (or (aws/get-unique-filename (str "img/" file-name) (aws/generate-default-suffixes))
@@ -209,7 +216,7 @@
                             (config/get "testBooleanValue" true)
                             (config/get "testIntegerValue" 42)
                             (json-response {"test-value" (config/get "testValue" "hello")})))
-  (ANY "/edit_config" req ((require-admin #(config/admin-page "/edit_config" %) req)))
+  (ANY "/edit_config" req ((require-admin #(config/admin-page "/edit_config" %)) req))
 
   (route/resources "/")
   (ANY "*" []
