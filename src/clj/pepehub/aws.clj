@@ -7,6 +7,7 @@
            com.amazonaws.ClientConfiguration
            com.amazonaws.HttpMethod
            com.amazonaws.services.s3.model.GeneratePresignedUrlRequest
+           com.amazonaws.services.s3.model.AmazonS3Exception
            com.amazonaws.auth.BasicAWSCredentials))
 
 ; Reference: https://github.com/weavejester/clj-aws-s3/blob/master/src/aws/sdk/s3.clj
@@ -20,11 +21,22 @@
 (defn http-method [method]
   (-> method name str/upper-case HttpMethod/valueOf))
 
+(def bucket-name (env :s3-bucket-name))
+
 (defn generate-presigned-url [key content-type method & [options]]
   (let [req (GeneratePresignedUrlRequest.
-             (env :s3-bucket-name) key (http-method method))]
+             bucket-name key (http-method method))]
     (doto req
       (.withExpiration (coerce/to-date (-> 1 t/days t/from-now)))
       (.withContentType content-type))
     (doseq [[k v] options] (.addRequestParameter req k v))
     (.toString (.generatePresignedUrl @s3-client req))))
+
+(defn s3-object-exists? [key]
+  (try
+    (.getObject @s3-client bucket-name key)
+    true
+    (catch AmazonS3Exception e
+      (if (= (.getStatusCode e) 404)
+        false
+        (throw e)))))

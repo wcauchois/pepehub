@@ -22,7 +22,7 @@
 
             [langohr.basic     :as lb]
 
-            [pepehub.s3 :as s3]
+            [pepehub.aws :as aws]
             [pepehub.queues :as q]
             [pepehub.utils :refer :all]
             [pepehub.mongo :refer :all]
@@ -42,7 +42,7 @@
 (defn convert-id [doc]
   (dissoc (assoc doc :id (.toString (:_id doc))) :_id))
 
-(def s3-prefix (str "https://" (env :s3-assets-bucket) ".s3.amazonaws.com/"))
+(def s3-prefix (str "https://" (env :s3-bucket-name) ".s3.amazonaws.com/"))
 
 (defn render-image [doc]
   (let [suffix (:suffix doc)]
@@ -181,7 +181,7 @@
         signing-opts {"x-amz-acl" "public-read"}]
     (json-response
      {"url"
-      (s3/generate-presigned-url s3-key file-type :put signing-opts)
+      (aws/generate-presigned-url s3-key file-type :put signing-opts)
       "suffix" file-name})))
 
 (defn add-image [req]
