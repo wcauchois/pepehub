@@ -173,8 +173,10 @@
 
 (defn sign-s3 [req]
   (let [file-name (get-in req [:params :file_name])
-        ; TODO: Check for dupe names and such (GLARING BUG)
-        s3-key (str "img/" file-name)
+        s3-key
+        (or (aws/get-unique-filename (str "img/" file-name) (aws/generate-default-suffixes))
+            (throw (Exception. "Could not create unique file name for image")))
+        unique-file-name (.substring s3-key (.length "img/"))
         file-type (get-in req [:params :file_type])
         _ (when-not (#{"image/jpg" "image/jpeg" "image/png"} file-type)
             (throw (Exception. "Unsupported file type")))
@@ -182,7 +184,8 @@
     (json-response
      {"url"
       (aws/generate-presigned-url s3-key file-type :put signing-opts)
-      "suffix" file-name})))
+      "suffix" unique-file-name
+      "thumbnail_url" (str s3-prefix "thumb/150/" unique-file-name)})))
 
 (defn add-image [req]
   (let [suffix (get-in req [:params :suffix])

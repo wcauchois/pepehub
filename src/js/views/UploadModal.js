@@ -37,7 +37,7 @@ function waitForImage(src, nTimes) {
     return Promise.reject();
   } else {
     return (
-      Promise.delay(150)
+      Promise.delay(500)
         .then(function() {
           return imageIsLoaded(src);
         })
@@ -121,16 +121,17 @@ var UploadModal = React.createClass({
         file_type: file.type
       }).then(function(response) {
         return uploadFile(file, response.url).then(function() {
+          return response;
+        });
+      }).then(function(response) {
+        return waitForImage(response.thumbnail_url).then(function() {
           return response.suffix;
         });
       }).then(function(suffix) {
         return ApiServices.addImage({suffix: suffix});
       }).then(function(newImage) {
-        return waitForImage(newImage.thumbnail_url).then(function() {
-          return newImage;
-        });
-      }).then(function(newImage) {
         this.setState({loadingMessage: ''});
+        // XXX figure out how to really make the page reload
         this.props.router.navigate('/image/' + newImage.id);
       }.bind(this));
     }
