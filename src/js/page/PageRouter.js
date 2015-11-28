@@ -23,7 +23,7 @@ var PageRouter = Base.extend({
   },
 
   renderPage: function(page, data) {
-    var pageComponent = page.createComponent(data);
+    var pageComponent = page.createComponent(data, this.options);
     ReactDOM.render(
       <ChromeView pageComponent={pageComponent} router={this} canUpload={this.options.canUpload}
         key={Math.random().toString()} />,

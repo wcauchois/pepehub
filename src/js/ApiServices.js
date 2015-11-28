@@ -32,5 +32,9 @@ module.exports = {
 
   addImage: function(params) {
     return postJSON('/add_image.json', params);
+  },
+
+  deleteImage: function(id) {
+    return postJSON('/delete_image.json', {id: id});
   }
 };

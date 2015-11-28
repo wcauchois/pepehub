@@ -1,11 +1,13 @@
 var React = require('react'),
     _ = require('lodash'),
-    SimpleTags = require('./SimpleTags');
+    SimpleTags = require('./SimpleTags'),
+    TimestampView = require('./TimestampView');
 
 var GalleryThumb = React.createClass({
   render: function() {
     return (
       <div className="galleryThumb">
+        <TimestampView timestamp={this.props.image.created_timestamp} />
         <a href={'#/image/' + this.props.image.id}>
           <img src={this.props.image.thumbnail_url} />
         </a>

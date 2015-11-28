@@ -93,6 +93,16 @@ body {
   &:hover {
     background-color: #eee;
   }
+
+  &.danger {
+    background-color: #FF8E8E;
+    color: white;
+    border-color: #EC5353;
+
+    &:hover {
+      background-color: #F15555;
+    }
+  }
 }
 
 .logo {
@@ -195,6 +205,12 @@ body {
     -webkit-transition: border-color 0.2s;
 
     &:hover {border-color: #F142E4;}
+
+    .timestamp {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 3px;
+    }
   }
 }
 
@@ -202,6 +218,10 @@ body {
   .detailImage {
     max-width: 500px;
     max-height: 500px;
+  }
+
+  .adminSection {
+    margin: 20px 0;
   }
 }
 

@@ -13,8 +13,8 @@ var ImagePage = Page.extend({
     return ApiServices.getImage(this.id);
   },
 
-  createComponent: function(response) {
-    return <ImagePageView image={response.image} />;
+  createComponent: function(response, pageOptions) {
+    return <ImagePageView image={response.image} canDelete={pageOptions.admin} />;
   }
 });
 

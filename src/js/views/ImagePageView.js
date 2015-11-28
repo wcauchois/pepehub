@@ -1,5 +1,6 @@
 var React = require('react'),
     _ = require('lodash'),
+    PageRouter = require('../page/PageRouter'),
     ApiServices = require('../ApiServices'),
     SimpleTags = require('./SimpleTags');
 
@@ -45,7 +46,23 @@ var TagsControl = React.createClass({
 });
 
 var ImagePageView = React.createClass({
+  deleteImage: function() {
+    if (window.confirm("Are you sure?")) {
+      ApiServices.deleteImage(this.props.image.id).then(function() {
+        PageRouter.navigate('/');
+      });
+    }
+  },
+
   render: function() {
+    var deleteButton;
+    if (this.props.canDelete) {
+      deleteButton = (
+        <div className="adminSection">
+          <div className="button danger" onClick={this.deleteImage}>Delete image</div>
+        </div>
+      );
+    }
     return (
       <div className="imagePage">
         <div className="header">
@@ -55,6 +72,7 @@ var ImagePageView = React.createClass({
         </div>
         <img className="detailImage" src={this.props.image.image_url} />
         <TagsControl tags={this.props.image.tags} imageId={this.props.image.id} />
+        {deleteButton}
       </div>
     );
   }

@@ -51,9 +51,11 @@
 
 (defn render-image [doc]
   (let [suffix (:suffix doc)]
-    (convert-id (assoc doc
-                       :image_url (str s3-prefix "img/" suffix)
-                       :thumbnail_url (str s3-prefix "thumb/150/" suffix)))))
+    {:id (.toString (:_id doc))
+     :suffix suffix
+     :created_timestamp (.getTime (:_id doc))
+     :image_url (str s3-prefix "img/" suffix)
+     :thumbnail_url (str s3-prefix "thumb/150/" suffix)}))
 
 (defn integer-param
   ([req name] (integer-param req name nil))
