@@ -4,12 +4,12 @@ var React = require('react'),
 
 var PagedGallery = React.createClass({
   canGoBackwards: function() {
-    return this.props.pageNumber > 1;
+    return this.props.pageNumber >= 1;
   },
 
-  prevPageClicked: function() {
+  prevPageClicked: function(event) {
     if (!this.canGoBackwards()) {
-      return false;
+      event.preventDefault();
     }
   },
 
