@@ -29,7 +29,7 @@ exports.handler = function(event, context) {
     return;
   }
   var imageType = typeMatch[1];
-  if (imageType != "jpg" && imageType != "png") {
+  if (imageType !== "jpg" && imageType !== "png" && imageType !== "jpeg") {
     console.log('skipping non-image ' + srcKey);
     return;
   }

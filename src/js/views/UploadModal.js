@@ -32,7 +32,7 @@ function imageIsLoaded(src) {
 
 function waitForImage(src, nTimes) {
   var maxTimes = 5;
-  nTimes = nTimes || maxTimes;
+  nTimes = (typeof nTimes === 'undefined') ? maxTimes : nTimes;
   if (nTimes <= 0) {
     return Promise.reject();
   } else {
