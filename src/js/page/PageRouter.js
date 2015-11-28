@@ -25,7 +25,8 @@ var PageRouter = Base.extend({
   renderPage: function(page, data) {
     var pageComponent = page.createComponent(data);
     ReactDOM.render(
-      <ChromeView pageComponent={pageComponent} router={this} canUpload={this.options.canUpload} />,
+      <ChromeView pageComponent={pageComponent} router={this} canUpload={this.options.canUpload}
+        key={Math.random().toString()} />,
       document.getElementById('render')
     );
   },
@@ -36,7 +37,15 @@ var PageRouter = Base.extend({
   },
 
   navigate: function(newRoute) {
+    if (newRoute.charAt(0) === '/') {
+      newRoute = newRoute.substring(1);
+    }
+    var needReload = _.isEqual(this.router.getRoute(), newRoute.split('/'));
     this.router.setRoute(newRoute);
+    if (needReload) {
+      // Force a reload
+      this.router.dispatch('on', newRoute);
+    }
   }
 });
 

@@ -131,7 +131,6 @@ var UploadModal = React.createClass({
         return ApiServices.addImage({suffix: suffix});
       }).then(function(newImage) {
         this.setState({loadingMessage: ''});
-        // XXX figure out how to really make the page reload
         this.props.router.navigate('/image/' + newImage.id);
       }.bind(this));
     }
