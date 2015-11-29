@@ -171,13 +171,6 @@
       {:status 200 :headers response-headers
        :body (load-resource "build/bundle.js")})))
 
-; Based on https://github.com/lift/framework/blob/master/core/util/src/main/scala/net/liftweb/util/HttpHelpers.scala#L105
-(defn append-params [url params]
-  (let [url-sep (if (.contains url "?") "&" "?")
-        enc #(java.net.URLEncoder/encode % "utf-8")]
-    (str url url-sep
-         (str/join "&" (map (fn [[k v]] (format "%s=%s" (enc k) (enc v))) params)))))
-
 (defn sign-s3 [req]
   (when-not (can-upload-images?)
     (throw (Exception. "Uploading images is not allowed")))
