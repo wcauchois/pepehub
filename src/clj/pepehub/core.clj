@@ -4,7 +4,6 @@
             [stencil.loader]
             [clojure.java.io :as io]
             [clojure.data.json :as json]
-            [clojure.string :as str]
             [stencil.core :refer [render-file]]
 
             [monger.core :as mg]
@@ -194,12 +193,22 @@
         doc (mc/insert-and-return @mongo-db "images" {:suffix suffix})]
     (json-response (render-image doc))))
 
+(defn popular-tags [req]
+  (let [tags (mq/with-collection @mongo-db "popular_tags"
+               (mq/find {})
+               (mq/sort (sorted-map :value -1))
+               (mq/limit 25))
+        rendered-tags (map (fn [t] {:name (:_id t)
+                                    :total (:value t)}) tags)]
+    (json-response {:tags rendered-tags})))
+
 (defroutes app
   (GET "/" req (home req))
   ; TODO: Come up with better ordering for routes
   (GET "/get_images.json" req (get-images req))
   (GET "/get_image.json" req (get-image req))
   (GET "/remove_tag.json" req (remove-tag req))
+  (GET "/popular_tags.json" req (popular-tags req))
   (GET "/admin_login" req (admin-login req))
   (GET "/bundle.js" req (get-bundle req))
   (POST "/sign_s3" req (sign-s3 req))

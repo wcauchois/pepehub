@@ -36,5 +36,9 @@ module.exports = {
 
   deleteImage: function(id) {
     return postJSON('/delete_image.json', {id: id});
-  }
+  },
+
+  popularTags: function() {
+    return Promise.resolve($.getJSON('/popular_tags.json'));
+  },
 };

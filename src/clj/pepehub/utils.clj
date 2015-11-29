@@ -1,5 +1,6 @@
 (ns pepehub.utils
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]))
 
 (defn load-resource [n]
   (slurp (io/resource n)))

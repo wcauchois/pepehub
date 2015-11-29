@@ -35,8 +35,13 @@ var ChromeView = React.createClass({
     return (
       <div className={classNames({chromeContainer: true, modalOpen: this.state.uploadModal})}>
         <div className="logo">
-          <div className="logoText">
-            PepeHub v0.1{String.fromCharCode(945)}
+          <div className="mainLogo">
+            <a href="#/" className="logoText">
+              PepeHub v0.1{String.fromCharCode(945)}
+            </a>
+            <div className="navButtons">
+              <a href="#/popular_tags" className="button">Popular Tags</a>
+            </div>
           </div>
           {uploadButton}
         </div>

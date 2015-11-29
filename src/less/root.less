@@ -110,14 +110,22 @@ body {
   padding: 5px;
   overflow: hidden;
 
-  .logoText {
-    cursor: default;
-    font-size: 18px;
-    color: white;
-    font-style: italic;
-    font-weight: bold;
+  .mainLogo {
     float: left;
-    line-height: 30px;
+
+    .logoText {
+      font-size: 18px;
+      font-style: italic;
+      font-weight: bold;
+      line-height: 30px;
+      text-decoration: none;
+      color: white;
+    }
+
+    .navButtons {
+      display: inline-block;
+      margin-left: 15px;
+    }
   }
 
   .uploadButton {
