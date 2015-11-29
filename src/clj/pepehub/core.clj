@@ -54,6 +54,7 @@
      :suffix suffix
      :created_timestamp (.getTime (:_id doc))
      :image_url (str s3-prefix "img/" suffix)
+     :tags (:tags doc)
      :thumbnail_url (str s3-prefix "thumb/150/" suffix)}))
 
 (defn integer-param
