@@ -37,7 +37,7 @@ function waitForImage(src, nTimes) {
     return Promise.reject();
   } else {
     return (
-      Promise.delay(500)
+      Promise.delay(1000)
         .then(function() {
           return imageIsLoaded(src);
         })
