@@ -28,6 +28,14 @@ body {
   background: #999;
   height: 30px;
   position: relative;
+  transition-property: background-color;
+  transition-duration: 0.3s;
+
+  &.error {
+    background: #EC4646;
+
+    .stripes {animation: none;}
+  }
 }
 
 @keyframes animateStripes {

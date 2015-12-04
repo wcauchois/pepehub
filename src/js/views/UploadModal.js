@@ -55,7 +55,7 @@ function waitForImage(src, nTimes) {
 var LoadingBar = React.createClass({
   render: function() {
     return (
-      <div className="loadingBar">
+      <div className={classNames({loadingBar: true, error: !!this.props.error})}>
         <span className="stripes"></span>
         <div className="content">{this.props.message}</div>
       </div>
@@ -114,7 +114,7 @@ var UploadModal = React.createClass({
     if (file && this.canSubmit()) {
       this.setState({
         uploading: true,
-        loadingMessage: 'Uploading image'
+        loadingMessage: "Uploading image"
       });
       ApiServices.getSignedRequest({
         file_name: file.name,
@@ -132,6 +132,9 @@ var UploadModal = React.createClass({
       }).then(function(newImage) {
         this.setState({loadingMessage: ''});
         this.props.router.navigate('/image/' + newImage.id);
+      }.bind(this)).caught(function(err) {
+        console.error(err);
+        this.setState({errorMessage: "Error uploading image"});
       }.bind(this));
     }
   },
@@ -165,7 +168,8 @@ var UploadModal = React.createClass({
             <div className={classNames({button: true, disabled: !this.canSubmit(), submitButton: true})}
               onClick={this.doSubmit}>Start Upload</div>
             <div className={classNames({loadingBarContainer: true, closed: !this.state.loadingMessage})}>
-              <LoadingBar message={this.state.loadingMessage} />
+              <LoadingBar message={this.state.errorMessage || this.state.loadingMessage}
+                error={!!this.state.errorMessage} />
             </div>
           </div>
         </div>
