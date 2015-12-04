@@ -41,4 +41,8 @@ module.exports = {
   popularTags: function() {
     return Promise.resolve($.getJSON('/popular_tags.json'));
   },
+
+  randomImage: function() {
+    return Promise.resolve($.getJSON('/random_image.json'));
+  }
 };

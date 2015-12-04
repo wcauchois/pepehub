@@ -1,6 +1,7 @@
 var React = require('react'),
     _ = require('lodash'),
     classNames = require('classnames'),
+    ApiServices = require('../ApiServices'),
     UploadModal = require('./UploadModal');
 
 var ChromeView = React.createClass({
@@ -19,6 +20,13 @@ var ChromeView = React.createClass({
     this.setState({uploadModal: false});
   },
 
+  randomImage: function(event) {
+    event.preventDefault();
+    ApiServices.randomImage().then(function(response) {
+      this.props.router.navigate('/image/' + response.id);
+    }.bind(this));
+  },
+
   render: function() {
     var uploadModal;
     if (this.state.uploadModal) {
@@ -34,13 +42,14 @@ var ChromeView = React.createClass({
     }
     return (
       <div className={classNames({chromeContainer: true, modalOpen: this.state.uploadModal})}>
-        <div className="logo">
+        <div className="chromeHeader">
           <div className="mainLogo">
             <a href="#/" className="logoText">
               PepeHub v0.1{String.fromCharCode(945)}
             </a>
             <div className="navButtons">
               <a href="#/popular_tags" className="button">Popular Tags</a>
+              <span className="button" onClick={this.randomImage}>Random Pepe</span>
             </div>
           </div>
           {uploadButton}

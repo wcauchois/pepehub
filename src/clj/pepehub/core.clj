@@ -194,6 +194,18 @@
         doc (mc/insert-and-return @mongo-db "images" {:suffix suffix :random (rand)})]
     (json-response (render-image doc))))
 
+; Getting a random document: http://stackoverflow.com/a/5517206
+; Probably want to add an index on "random"
+; > db.images.ensureIndex({random: 1})
+(defn random-image [req]
+  (let [the-rand (rand)
+        gt-result (mc/find-one-as-map @mongo-db "images" {:random {$gte the-rand}})
+        result (or gt-result
+                   (mc/find-one-as-map @mongo-db "images" {:random {$lte the-rand}}))]
+    (if result
+      (json-response {:id (-> result :_id .toString)})
+      (throw (Exception. "Could not find a random image")))))
+
 (defn popular-tags [req]
   (let [tags (mq/with-collection @mongo-db "popular_tags"
                (mq/find {})
@@ -216,6 +228,7 @@
   (POST "/add_image.json" req (add-image req))
   (POST "/add_tag.json" req (add-tag req))
   (POST "/delete_image.json" req ((require-admin delete-image) req))
+  (GET "/random_image.json" req (random-image req))
 
   (GET "/test_config" req (do
                             (config/get "testBooleanValue" true)
