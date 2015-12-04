@@ -191,7 +191,7 @@
 
 (defn add-image [req]
   (let [suffix (get-in req [:params :suffix])
-        doc (mc/insert-and-return @mongo-db "images" {:suffix suffix})]
+        doc (mc/insert-and-return @mongo-db "images" {:suffix suffix :random (rand)})]
     (json-response (render-image doc))))
 
 (defn popular-tags [req]
