@@ -7,11 +7,9 @@ var HomePageView = React.createClass({
     return (
       <div>
         <div className="header">
-          <h3>Page {this.props.pageNumber} of ???</h3>
+          <h3>Page {this.props.pageNumber} of {this.props.totalPages}</h3>
         </div>
-        <PagedGallery
-          images={this.props.images}
-          pageNumber={this.props.pageNumber} />
+        {React.createElement(PagedGallery, this.props)}
       </div>
     );
   }

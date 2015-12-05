@@ -3,6 +3,8 @@ body {
   margin: 0;
 }
 
+@tagColor: #2041B7;
+
 .borderRadius(@radius) {
   -moz-border-radius: @radius;
   -webkit-border-radius: @radius;
@@ -246,10 +248,11 @@ body {
 
 .tagsControl {
   .tagContainer {
+    .borderRadius(5px);
+
     margin: 5px;
-    background-color: #2041B7;
+    background-color: @tagColor;
     display: inline-block;
-    border-radius: 10px;
     color: white;
 
     a {
@@ -283,8 +286,30 @@ body {
   }
 
   &.noRemoval .removeTag {display: none;}
-
 }
+
+.bigTag {
+  .borderRadius(5px);
+
+  display: inline-block;
+  padding: 5px;
+  cursor: default;
+  background-color: @tagColor;
+  color: white;
+
+  .icon {
+    width: 20px;
+    display: inline-block;
+    margin-right: 5px;
+    height: 20px;
+    background-size: 20px;
+    background-image: url(/img/tag-icon.png);
+    position: relative;
+    top: 3px;
+  }
+}
+
+.tagPage .header .bigTag {margin-right: 10px;}
 
 .pageButtons .button {
   &:first-child {margin-left: 0;}

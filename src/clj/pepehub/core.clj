@@ -4,6 +4,7 @@
             [stencil.loader]
             [clojure.java.io :as io]
             [clojure.data.json :as json]
+            [clojure.core.async :as a :refer [>! <! >!! <!! go]]
             [stencil.core :refer [render-file]]
 
             [monger.core :as mg]
@@ -73,13 +74,20 @@
         offset (integer-param req :offset 0)
         tag-filter (get-in req [:params :tag])
         criteria (if tag-filter {:tags tag-filter} {})
-        images (map render-image
-                    (mq/with-collection @mongo-db "images"
-                      (mq/find criteria)
-                      (mq/sort (sorted-map :_id -1))
-                      (mq/limit limit)
-                      (mq/skip offset)))]
-    (json-response {"images" images})))
+
+        images-chan
+        (go (mq/with-collection @mongo-db "images"
+              (mq/find criteria)
+              (mq/sort (sorted-map :_id -1))
+              (mq/limit limit)
+              (mq/skip offset)))
+        count-chan
+        (go (mc/count @mongo-db "images" criteria))
+
+        images (map render-image (<!! images-chan))
+        total-count (<!! count-chan)]
+    (json-response {"images" images
+                    "total_count" total-count})))
 
 (defn find-image [id]
   (mc/find-one-as-map @mongo-db "images" {:_id id}))
