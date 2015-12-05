@@ -1,84 +1,9 @@
+@import './mixins';
+@import './loading-bar';
+
 body {
   font-family: sans-serif;
   margin: 0;
-}
-
-@tagColor: #2041B7;
-
-.borderRadius(@radius) {
-  -moz-border-radius: @radius;
-  -webkit-border-radius: @radius;
-  border-radius: @radius;
-}
-
-.loadingBarContainer {
-  margin-top: 10px;
-  max-height: 30px;
-  overflow-y: hidden;
-  transition-duration: .5s;
-  transition-property: max-height margin-top;
-
-  &.closed {
-    max-height: 0;
-    margin-top: 0;
-  }
-}
-
-.loadingBar {
-  .borderRadius(5px);
-
-  background: #999;
-  height: 30px;
-  position: relative;
-  transition-property: background-color;
-  transition-duration: 0.3s;
-
-  &.error {
-    background: #EC4646;
-
-    .stripes {animation: none;}
-  }
-}
-
-@keyframes animateStripes {
-  0% {background-position: 0 0;}
-  100% {background-position: 50px 50px;}
-}
-
-.loadingBar .content {
-  box-sizing: border-box;
-  cursor: default;
-  color: white;
-  line-height: 20px;
-  padding: 5px;
-  position: absolute;
-  text-align: center;
-  width: 100%;
-  z-index: 999;
-}
-
-.loadingBar .stripes {
-  .borderRadius(5px);
-
-  animation: animateStripes 2s linear infinite;
-  background-image: linear-gradient(
-    -45deg,
-    rgba(255, 255, 255, .2) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255, 255, 255, .2) 50%,
-    rgba(255, 255, 255, .2) 75%,
-    transparent 75%,
-    transparent
-  );
-  background-size: 50px 50px;
-  bottom: 0;
-  left: 0;
-  overflow: hidden;
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 1;
 }
 
 .button {
