@@ -55,7 +55,7 @@
      :suffix suffix
      :created_timestamp (.getTime (:_id doc))
      :image_url (str s3-prefix "img/" suffix)
-     :tags (:tags doc)
+     :tags (or (:tags doc) [])
      :thumbnail_url (str s3-prefix "thumb/150/" suffix)}))
 
 (defn integer-param
@@ -220,7 +220,7 @@
             ; searching by tag as the distributionm will be skewed.
           (let [candidates (mq/with-collection @mongo-db "images"
                              (mq/find {:tags tag}))]
-            (and candidates (rand-nth candidates)))
+            (if (empty? candidates) nil (rand-nth candidates)))
           (get-random-image))]
     (if result
       (json-response (render-image result))
