@@ -205,14 +205,26 @@
 ; Getting a random document: http://stackoverflow.com/a/5517206
 ; Probably want to add an index on "random"
 ; > db.images.ensureIndex({random: 1})
-(defn random-image [req]
+(defn get-random-image []
   (let [the-rand (rand)
-        gt-result (mc/find-one-as-map @mongo-db "images" {:random {$gte the-rand}})
-        result (or gt-result
-                   (mc/find-one-as-map @mongo-db "images" {:random {$lte the-rand}}))]
+        gt-result (mc/find-one-as-map @mongo-db "images" {:random {$gte the-rand}})]
+    (or gt-result
+        (mc/find-one-as-map @mongo-db "images" {:random {$lte the-rand}}))))
+
+(defn random-image [req]
+  (let [tag (get-in req [:params :tag])
+        result
+        (if tag
+            ; Hacky solution for when a tag is specified: fetch ALL images. Won't scale as
+            ; tags become more popular. Our "random" field trick doesn't really work when you're
+            ; searching by tag as the distributionm will be skewed.
+          (let [candidates (mq/with-collection @mongo-db "images"
+                             (mq/find {:tags tag}))]
+            (and candidates (rand-nth candidates)))
+          (get-random-image))]
     (if result
-      (json-response {:id (-> result :_id .toString)})
-      (throw (Exception. "Could not find a random image")))))
+      (json-response (render-image result))
+      (json-response {"result" "not-found"} 404))))
 
 (defn popular-tags [req]
   (let [tags (mq/with-collection @mongo-db "popular_tags"
