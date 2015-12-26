@@ -217,7 +217,7 @@
         (if tag
             ; Hacky solution for when a tag is specified: fetch ALL images. Won't scale as
             ; tags become more popular. Our "random" field trick doesn't really work when you're
-            ; searching by tag as the distributionm will be skewed.
+            ; searching by tag as the distribution will be skewed.
           (let [candidates (mq/with-collection @mongo-db "images"
                              (mq/find {:tags tag}))]
             (if (empty? candidates) nil (rand-nth candidates)))
