@@ -38,9 +38,11 @@ var DropdownMenu = React.createClass({
   },
 
   gotDropdownMenu: function(dropdownMenu) {
-    var domNode = ReactDOM.findDOMNode(this);
-    if (domNode) {
-      dropdownMenu.style.minWidth = '' + domNode.offsetWidth + 'px';
+    if (dropdownMenu) {
+      var domNode = ReactDOM.findDOMNode(this);
+      if (domNode) {
+        dropdownMenu.style.minWidth = '' + domNode.offsetWidth + 'px';
+      }
     }
   }
 });
