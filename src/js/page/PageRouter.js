@@ -25,7 +25,9 @@ var PageRouter = Base.extend({
   renderPage: function(page, data) {
     var pageComponent = page.createComponent(data, this.options);
     ReactDOM.render(
-      <ChromeView pageComponent={pageComponent} router={this} canUpload={this.options.canUpload}
+      <ChromeView pageComponent={pageComponent} router={this}
+        canUpload={this.options.canUpload}
+        showTaggingGame={this.options.showTaggingGame}
         key={Math.random().toString()} />,
       document.getElementById('render')
     );

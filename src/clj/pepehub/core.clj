@@ -39,7 +39,8 @@
   (let [is-admin? (get-in req [:session :admin])
         page-options
         {"admin" (or is-admin? false)
-         "canUpload" (can-upload-images?)}]
+         "canUpload" (can-upload-images?)
+         "showTaggingGame" (config/get "showTaggingGame" false)}]
     {:status 200
      :headers {"Content-Type" "text/html"}
      :body (render-file "templates/home" {:options (json/write-str page-options)})}))

@@ -2,7 +2,8 @@ var React = require('react'),
     _ = require('lodash'),
     classNames = require('classnames'),
     ApiServices = require('../ApiServices'),
-    UploadModal = require('./UploadModal');
+    UploadModal = require('./UploadModal'),
+    DropdownMenu = require('./DropdownMenu');
 
 var ChromeView = React.createClass({
   getInitialState: function() {
@@ -40,6 +41,13 @@ var ChromeView = React.createClass({
         </div>
       );
     }
+    var taggingGameButton;
+    if (this.props.showTaggingGame) {
+      var taggingGameEntries = [["Leaderboard", "#/leaderboard"]];
+      taggingGameButton = (
+        <DropdownMenu text="Tagging Game" href="#/tagging_game" entries={taggingGameEntries} />
+      );
+    }
     return (
       <div className={classNames({chromeContainer: true, modalOpen: this.state.uploadModal})}>
         <div className="chromeHeader">
@@ -50,6 +58,7 @@ var ChromeView = React.createClass({
             <div className="navButtons">
               <a href="#/popular_tags" className="button">Popular Tags</a>
               <span className="button" onClick={this.randomImage}>Random Pepe</span>
+              {taggingGameButton}
             </div>
           </div>
           {uploadButton}

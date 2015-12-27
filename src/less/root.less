@@ -40,10 +40,58 @@ body {
   }
 }
 
+.dropdown {
+  position: relative;
+  display: inline-block;
+
+  &.open > .button {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .mainButton {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .caret {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: none;
+    font-size: 14px;
+    padding-bottom: 6px;
+  }
+
+  .dropdownMenu {
+    display: none;
+    list-style-type: none;
+    padding-left: 0;
+    position: absolute;
+    top: 0;
+    z-index: 1000;
+    margin: 30px 0 0 0;
+
+    .button {
+      border-radius: 0;
+      border-top: none;
+      display: block;
+
+      &:last-child {
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+      }
+    }
+  }
+
+  &.open .dropdownMenu {
+    display: block;
+  }
+}
+
 .chromeHeader {
   background: #52DA52;
   padding: 5px;
-  overflow: hidden;
+  height: 31px;
 
   .mainLogo {
     float: left;
@@ -61,8 +109,8 @@ body {
       display: inline-block;
       margin-left: 15px;
 
-      .button {margin-left: 10px;}
-      .button:first-child {margin-left: 0;}
+      > .button, > .dropdown {margin-left: 10px;}
+      > .button:first-child, > .dropdown:first-child {margin-left: 0;}
     }
   }
 

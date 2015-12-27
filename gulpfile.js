@@ -18,6 +18,11 @@ gulp.task('scripts', function() {
   var basePipe = browserify('src/js/app.js')
     .transform(reactify)
     .bundle()
+    .on('error', function(err) {
+      console.log(err.message.red);
+      // Need to emit end event: http://stackoverflow.com/a/24817446
+      this.emit('end');
+    })
     .pipe(source('bundle.js'))
   var finalPipe;
   if (devMode) {
@@ -39,6 +44,9 @@ gulp.task('styles', function() {
 gulp.task('default', ['scripts', 'styles']);
 
 gulp.task('watch', ['scripts', 'styles'], function() {
+  if (!devMode) {
+    console.log("Use --dev for unminified scripts".gray);
+  }
   gulp.watch('src/js/**', ['scripts']);
   gulp.watch('src/less/**', ['styles']);
 });
