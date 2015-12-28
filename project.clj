@@ -8,6 +8,7 @@
                  [ring/ring-core "1.4.0"]
                  [ring/ring-devel "1.4.0"]
                  [com.novemberain/langohr "3.3.0"]
+                 [slingshot "0.12.2"]
                  [org.clojure/core.async "0.2.374"]
                  [com.amazonaws/aws-java-sdk "1.7.5" :exclusions [joda-time]]
                  [clj-time "0.11.0"]
@@ -15,6 +16,7 @@
                  [stencil "0.5.0"]
                  [org.clojure/data.json "0.2.6"]
                  [com.novemberain/monger "3.0.0-rc2"]
+                 [crypto-password "0.1.3"]
                  [compojure "1.4.0"]]
   :uberjar-name "pepehub-standalone.jar"
   :plugins [[lein-environ "1.0.1"]

@@ -22,6 +22,7 @@ var DropdownMenu = React.createClass({
         </li>
       );
     });
+
     return (
       <div className={classNames({dropdown: true, open: this.state.open})}>
         <a href={this.props.href} className="button mainButton">

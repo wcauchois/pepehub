@@ -6,6 +6,8 @@
             [clojure.data.json :as json]
             [clojure.core.async :as a :refer [>! <! >!! <!! go]]
             [stencil.core :refer [render-file]]
+            [crypto.password.bcrypt :as password]
+            [slingshot.slingshot :refer [throw+ try+]]
 
             [monger.core :as mg]
             [monger.query :as mq]
@@ -65,10 +67,44 @@
    (let [value (get-in req [:params name])]
      (if value (Integer/parseInt value) default-value))))
 
+(defn optional-param [req name] (get-in req [:params name]))
+
+(defn api-fail! [type & [message status]]
+  (throw+ {:api-error true
+           :type type
+           :message (or message type)
+           :status (or status 400)}))
+
+(defn required-param [req the-name]
+  (let [value (get-in req [:params the-name])]
+    (if value value
+        (api-fail! "missing_param"
+                   (str "Missing parameter '" (name the-name) "'")))))
+
+(defn validate [value func]
+  "If the validator returns something truthy, throw a bad_param error. If the
+   result is a string, that becomes the detailed error message."
+  (let [message (func value)]
+    (if message
+      (api-fail! "bad_param" (if (string? message) message nil))
+      value)))
+
 (defn json-response [data & [status]]
   {:status (or status 200)
    :headers {"Content-Type" "application/json"}
    :body (json/write-str data)})
+
+(defn error-response [type & [message custom-status]]
+  (-> (json-response {:error type
+                      :message (or message type)})
+      (status (or custom-status 400))))
+
+(defn wrap-api-errors [handler]
+  (fn [req]
+    (try+
+     (handler req)
+     (catch (:api-error %) e
+       (error-response (:type e) (:message e) (:status e))))))
 
 (defn get-images [req]
   (let [limit (min 100 (integer-param req :limit 20))
@@ -98,16 +134,6 @@
     (json-response
      {"image"
       (render-image (find-image id))})))
-
-; XXX unused anymore?
-(comment
-  (defn return-tags [id]
-    (json-response {"tags"
-                    (or
-                     (:tags (mq/with-collection @mongo-db "images"
-                              (mq/find {:_id id})
-                              (mq/fields [:tags])))
-                     [])})))
 
 (defn enqueue-refresh-tags []
   (lb/publish @rmq-ch q/default-exchange-name q/refresh-tags-qname
@@ -236,9 +262,48 @@
                                     :total (:value t)}) tags)]
     (json-response {:tags rendered-tags})))
 
+(defn render-user [user]
+  {:id (.toString (:_id user))
+   :name (:name user)
+   :points (:points user)})
+
+(defn login-state [req]
+  (let [user (get-in req [:session :user])]
+    (json-response
+     (if user
+       {:user (render-user user)}
+       {}))))
+
+(defn user-response-with-session [user]
+  (assoc (json-response (render-user user))
+         :session {:user user}))
+
+(defn create-account [req]
+  (let [user-name (required-param req :name)
+        existing-user-count (mc/count @mongo-db "users" {:name user-name})
+        _ (when (> existing-user-count 0)
+            (api-fail! "duplicate_user" (format "User '%s' already exists!" user-name)))
+        user-pass (required-param req :pass)
+        user-to-insert
+        {:name user-name
+         :pass (password/encrypt user-pass)
+         :points 0}
+        new-user (mc/insert-and-return @mongo-db "users" user-to-insert)]
+    (user-response-with-session new-user)))
+
+(defn do-login [req]
+  (let [user-name (required-param req :name)
+        user-pass (required-param req :pass)
+        the-user (mc/find-one-as-map @mongo-db "users" {:name user-name})
+        fail-wrong! (fn [] (api-fail! "login_failed" "User or password was wrong"))]
+    (if the-user
+      (do
+        (when-not (password/check user-pass (:pass the-user)) (fail-wrong!))
+        (user-response-with-session the-user))
+      (fail-wrong!))))
+
 (defroutes app
   (GET "/" req (home req))
-  ; TODO: Come up with better ordering for routes
   (GET "/get_images.json" req (get-images req))
   (GET "/get_image.json" req (get-image req))
   (GET "/remove_tag.json" req (remove-tag req))
@@ -251,6 +316,12 @@
   (POST "/delete_image.json" req ((require-admin delete-image) req))
   (GET "/random_image.json" req (random-image req))
 
+  ; Login/user state
+  (GET "/login_state.json" req (login-state req))
+  (POST "/login.json" req (do-login req))
+  (POST "/create_account.json" req (create-account req))
+
+  ; Runtime config
   (GET "/test_config" req (do
                             (config/get "testBooleanValue" true)
                             (config/get "testIntegerValue" 42)
@@ -270,6 +341,7 @@
   (-> routes
       wrap-keyword-params
       wrap-params
+      wrap-api-errors
       config/middleware
       (with-opts wrap-session {:store session-store})
       (optionally (dev-mode?) wrap-stacktrace)))

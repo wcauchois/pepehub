@@ -3,9 +3,9 @@ var React = require('react'),
 
 var PopularTagsPageView = React.createClass({
   render: function() {
-    var tagRows = _.map(this.props.tags, function(item) {
+    var tagRows = _.map(this.props.tags, function(item, index) {
       return (
-        <tr>
+        <tr key={index.toString()}>
           <td>
             <a href={"#/tag/" + item.name}>
               {item.name}
@@ -25,7 +25,9 @@ var PopularTagsPageView = React.createClass({
         </div>
         <div className="popularTags">
           <table>
-            {tagRows}
+            <tbody>
+              {tagRows}
+            </tbody>
           </table>
         </div>
       </div>
